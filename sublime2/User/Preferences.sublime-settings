@@ -1,6 +1,6 @@
 {
 	"auto_indent": true,
-	"color_scheme": "Packages/Color Scheme - Default/LAZY.tmTheme",
+	"color_scheme": "Packages/User/Espresso Soda.tmTheme",
 	"default_line_ending": "unix",
 	"draw_minimap_border": true,
 	"ensure_newline_at_eof_on_save": true,
@@ -11,6 +11,7 @@
 	[
 		"Vintage"
 	],
+	"reveal-on-activate": true,
 	"shift_tab_unindent": true,
 	"tab_size": 2,
 	"theme": "Soda Light.sublime-theme",
