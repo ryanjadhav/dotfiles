@@ -1,2 +1,1 @@
-#Atom customization goes here.
-
+# Atom customization goes here.
