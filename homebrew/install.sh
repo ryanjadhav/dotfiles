@@ -8,12 +8,11 @@
 # Check for Homebrew
 if test ! $(which brew)
 then
-  echo "  x You should probably install Homebrew first:"
-  echo "    https://github.com/mxcl/homebrew/wiki/installation"
-  exit
+  echo "  Installing Homebrew for you."
+  ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
 # Install homebrew packages
-brew install grc coreutils spark
+brew install grc coreutils spark direnv exiftool youtube-dl hub s3cmd taglib id3lib the_silver_searcher ffmpeg
 
 exit 0
