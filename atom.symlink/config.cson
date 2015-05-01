@@ -46,7 +46,7 @@
       "text.plain"
     ]
   "tree-view":
-    hideIgnoredNames: true
+    hideIgnoredNames: false
     hideVcsIgnoredFiles: false
   "autoclose-html": {}
   linter:

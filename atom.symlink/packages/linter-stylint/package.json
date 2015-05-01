@@ -1,0 +1,40 @@
+{
+  "name": "linter-stylint",
+  "main": "./lib/init",
+  "linter-package": true,
+  "activationEvents": [],
+  "version": "0.5.0",
+  "description": "Linter plugin for Stylus, using `stylint`.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AtomLinter/linter-stylint.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/AtomLinter/linter-stylint/issues"
+  },
+  "homepage": "https://github.com/AtomLinter/linter-stylint",
+  "readme": "Atom linter-stylint\n=========================\n\nThis linter plugin for [Linter](https://github.com/AtomLinter/Linter) provides an interface to [stylint](https://www.npmjs.com/package/stylint). It will be used with files that have the “Stylus” syntax.\n\n## Installation\nLinter package must be installed in order to use this plugin. If Linter is not installed, please follow the instructions [here](https://github.com/AtomLinter/Linter).\n\n### Plugin installation\n```\n$ apm install linter-stylint\n```\n\n## Settings\nYou can configure linter-stylint by editing ~/.atom/config.cson (choose Open Your Config in Atom menu):\n```\n'linter-stylint':\n  'stylintExecutablePath': null #stylint path. run 'which stylint' to find the path\n```\n\n## Contributing\nIf you would like to contribute enhancements or fixes, please do the following:\n\n1. Fork the plugin repository.\n2. Hack on a separate topic branch created from the latest `master`.\n3. Commit and push the topic branch.\n4. Make a pull request.\n",
+  "_id": "linter-stylint@0.5.0",
+  "_shasum": "0938ba345a196e65f59de6e6f73748e06e1b0e39",
+  "_resolved": "file:../d-115330-10810-j67u4q/package.tgz",
+  "_from": "../d-115330-10810-j67u4q/package.tgz",
+  "_atomModuleCache": {
+    "version": 1,
+    "dependencies": [],
+    "extensions": {
+      ".coffee": [
+        "lib/init.coffee",
+        "lib/linter-stylint.coffee"
+      ],
+      ".json": [
+        "package.json"
+      ]
+    },
+    "folders": []
+  }
+}
