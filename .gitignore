@@ -1,4 +1,5 @@
 # atom files
+atom.symlink/.apm
 atom.symlink/.node-gyp
 atom.symlink/.storage
 atom.symlink/compile-cache/

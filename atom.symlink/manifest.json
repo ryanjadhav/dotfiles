@@ -1,0 +1,122 @@
+[
+  {
+    "name": "atom-ternjs",
+    "version": "0.6.3",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/tststs/atom-ternjs"
+    }
+  },
+  {
+    "name": "chester-atom-syntax",
+    "version": "0.1.1",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/csutter/chester-atom-syntax"
+    }
+  },
+  {
+    "name": "code-links",
+    "version": "0.3.11",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/AsaAyers/code-links"
+    }
+  },
+  {
+    "name": "editorconfig",
+    "version": "1.0.0",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/sindresorhus/atom-editorconfig"
+    }
+  },
+  {
+    "name": "language-dustjs",
+    "version": "0.2.0",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/akshayp/language-dustjs"
+    }
+  },
+  {
+    "name": "atom-beautify",
+    "version": "0.27.10",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/Glavin001/atom-beautify"
+    }
+  },
+  {
+    "name": "linter-eslint",
+    "version": "0.5.8",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/AtomLinter/linter-eslint.git"
+    }
+  },
+  {
+    "name": "linter-less",
+    "version": "0.4.0",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/AtomLinter/linter-less"
+    }
+  },
+  {
+    "name": "linter-scss-lint",
+    "version": "1.0.4",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/AtomLinter/linter-scss-lint"
+    }
+  },
+  {
+    "name": "minimap",
+    "version": "4.9.2",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/atom-minimap/minimap"
+    }
+  },
+  {
+    "name": "seti-ui",
+    "version": "0.7.1",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/jesseweed/seti-ui"
+    }
+  },
+  {
+    "name": "vim-mode",
+    "version": "0.50.0",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/atom/vim-mode"
+    }
+  },
+  {
+    "name": "file-icons",
+    "version": "1.5.7",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/DanBrooker/file-icons"
+    }
+  },
+  {
+    "name": "pane-layout-plus",
+    "version": "0.7.2",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/chemoish/atom-pane-layout"
+    }
+  },
+  {
+    "name": "linter",
+    "version": "0.12.6",
+    "repo": {
+      "type": "git",
+      "url": "https://github.com/AtomLinter/Linter.git"
+    }
+  }
+]
