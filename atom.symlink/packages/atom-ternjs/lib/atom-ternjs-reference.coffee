@@ -40,8 +40,7 @@ class Reference
     @manager.helper.openFileAndGoTo(ref.start, ref.file)
 
   findReference: ->
-    dir = atom.project.getDirectories()[0]
-    return unless dir
+    return unless @manager.client
     editor = atom.workspace.getActiveTextEditor()
     return unless editor
     cursor = editor.getLastCursor()
@@ -50,7 +49,7 @@ class Reference
       @references = data
       for ref in data.refs
         ref.file = ref.file.replace(/^.\//, '')
-        ref.file = dir.relativize(ref.file)
+        ref.file = path.resolve(atom.project.relativizePath(@manager.server.rootPath)[0], ref.file)
       data.refs = _.uniq(data.refs, (item) =>
         JSON.stringify item
       )
@@ -61,9 +60,7 @@ class Reference
 
   gatherMeta: (data) ->
     for item, i in data.refs
-      projectRoot = atom.project.getDirectories()[0]
-      file = path.resolve(__dirname, projectRoot.path + '/' + item.file)
-      content = fs.readFileSync(file, 'utf8')
+      content = fs.readFileSync(item.file, 'utf8')
       buffer = new TextBuffer({ text: content })
       item.position = buffer.positionForCharacterIndex(item.start)
       item.lineText = buffer.lineForRow(item.position.row)

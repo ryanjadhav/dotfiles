@@ -38,4 +38,7 @@ do
   source $file
 done
 
+ulimit -n 2048
+ulimit -u 1024
+
 unset config_files

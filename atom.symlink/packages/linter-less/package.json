@@ -1,10 +1,9 @@
 {
   "name": "linter-less",
   "main": "./lib/init",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Lint `less` on the fly, using less",
   "linter-package": true,
-  "activationEvents": [],
   "repository": {
     "type": "git",
     "url": "https://github.com/AtomLinter/linter-less"
@@ -22,10 +21,10 @@
     "url": "https://github.com/AtomLinter/linter-less/issues"
   },
   "homepage": "https://github.com/AtomLinter/linter-less",
-  "_id": "linter-less@0.3.1",
-  "_shasum": "dfbab0ccd485e5dc95396b99efd272823f36bbf2",
-  "_resolved": "file:../d-115330-10751-8ii3kl/package.tgz",
-  "_from": "../d-115330-10751-8ii3kl/package.tgz",
+  "_id": "linter-less@0.4.0",
+  "_shasum": "7eab32249f8a4da939f73c7e5c7a8e48cbd053e2",
+  "_resolved": "file:../d-11544-42499-1jcqk7u/package.tgz",
+  "_from": "../d-11544-42499-1jcqk7u/package.tgz",
   "_atomModuleCache": {
     "version": 1,
     "dependencies": [

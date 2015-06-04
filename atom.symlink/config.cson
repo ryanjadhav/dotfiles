@@ -1,8 +1,6 @@
 "*":
   "exception-reporting":
     userId: "4a0f7ed9-4f94-f2c2-c679-ff2ae446049c"
-  "release-notes":
-    viewedVersion: "0.94.0"
   welcome:
     showOnStartup: false
   metrics:
@@ -12,11 +10,12 @@
     softWrapAtPreferredLineLength: true
     fontFamily: "Menlo"
     showIndentGuide: true
-    fontSize: 12
     tabLength: 2
-    invisibles: {}
+    invisibles:
+      {}
     preferredLineLength: 100
     showInvisibles: true
+    fontSize: 14
   whitespace:
     ensureSingleTrailingNewline: true
     ignoreWhitespaceOnCurrentLine: false
@@ -35,10 +34,6 @@
       ".DS_Store"
     ]
     useReactEditor: true
-    themes: [
-      "seti-ui"
-      "base16-tomorrow-dark-theme"
-    ]
   "spell-check":
     grammars: [
       "source.gfm"
@@ -48,12 +43,14 @@
   "tree-view":
     hideIgnoredNames: false
     hideVcsIgnoredFiles: false
-  "autoclose-html": {}
+  "autoclose-html":
+    {}
   linter:
     lintDebug: true
     statusBar: "Show error of the selected line"
     showErrorInline: false
-  "linter-jshint": {}
+  "linter-jshint":
+    {}
   "autocomplete-plus":
     confirmCompletion: "tab and enter"
   "vim-mode":
@@ -61,6 +58,18 @@
     useSmartcaseForSearch: true
   "linter-eslint":
     disableWhenNoEslintrcFileInPath: true
-  minimap: {}
-  "atom-pair": {}
-  ternjs: {}
+    useGlobalEslint: true
+  minimap:
+    {}
+  "atom-pair":
+    {}
+  ternjs:
+    {}
+  "code-links":
+    {}
+  "atom-beautify":
+    _analyticsUserId: "9248b31f-f709-40a3-bf2f-584776d6b5e4"
+  "one-dark-ui":
+    {}
+  "atom-ternjs":
+    {}

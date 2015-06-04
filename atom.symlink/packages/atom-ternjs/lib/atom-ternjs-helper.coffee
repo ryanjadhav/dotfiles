@@ -19,6 +19,7 @@ class Helper
     \ ],\n
     \ "plugins": {\n
     \ \ \ "complete_strings": {},\n
+    \ \ \ "lint": {},\n
     \ \ \ "doc_comment": {\n
     \ \ \ \ "fullDocs": true\n
     \ \ \ }\n
@@ -28,26 +29,42 @@ class Helper
     @manager = manager
 
   hasTernProjectFile: ->
-    @projectRoot = atom.project.getDirectories()[0]
+    return false if !@manager.server
+    @projectRoot = @manager.server?.rootPath
     return undefined unless @projectRoot
-    return true if @fileExists(path.resolve(__dirname, @projectRoot.path + '/.tern-project')) is undefined
+    return true if @fileExists(path.resolve(__dirname, @projectRoot + '/.tern-project')) is undefined
     return false
 
   createTernProjectFile: ->
     return unless @hasTernProjectFile() is false
-    @writeFile(path.resolve(__dirname, @projectRoot.path + '/.tern-project'))
+    @writeFile(path.resolve(__dirname, @projectRoot + '/.tern-project'), @ternProjectFileContent)
+
+  updateTernFile: ->
+    @writeFile(path.resolve(__dirname, @projectRoot + '/.tern-project'))
 
   fileExists: (path) ->
     try fs.accessSync path, fs.F_OK, (err) =>
       console.log err
     catch e then return false
 
-  writeFile: (path) ->
-    fs.writeFile path, @ternProjectFileContent, (err) =>
-      atom.workspace.open(path)
+  writeFile: (filePath, content) ->
+    fs.writeFile filePath, content, (err) =>
+      atom.workspace.open(filePath)
       return unless err
-      content = 'Could not create .tern-project file. Use the README to manually create a .tern-project file.'
-      atom.notifications.addInfo(content, dismissable: true)
+      message = 'Could not create/update .tern-project file. Use the README to manually create a .tern-project file.'
+      atom.notifications.addInfo(message, dismissable: true)
+
+  readFile: (path) ->
+    fs.readFileSync path, 'utf8'
+
+  getFileContent: (filePath, projectRoot) ->
+    @projectRoot = @manager.server?.rootPath
+    return false unless @projectRoot
+    if projectRoot
+      filePath = @projectRoot + filePath
+    resolvedPath = path.resolve(__dirname, filePath)
+    return false unless @fileExists(resolvedPath) is undefined
+    @readFile(resolvedPath)
 
   markerCheckpointBack: ->
     return unless @checkpointsDefinition.length
@@ -55,7 +72,7 @@ class Helper
     @openFileAndGoToPosition(checkpoint.marker.range.start, checkpoint.editor.getURI())
 
   setMarkerCheckpoint: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     buffer = editor.getBuffer()
     cursor = editor.getLastCursor()
     return unless cursor
@@ -71,15 +88,20 @@ class Helper
       cursor.setBufferPosition(position)
 
   openFileAndGoTo: (start, file) ->
-    that = this
-    atom.workspace.open(file).then (textEditor) ->
+    atom.workspace.open(file).then (textEditor) =>
       buffer = textEditor.getBuffer()
       cursor = textEditor.getLastCursor()
       cursor.setBufferPosition(buffer.positionForCharacterIndex(start))
-      that.markDefinitionBufferRange(cursor, textEditor)
+      @markDefinitionBufferRange(cursor, textEditor)
 
   formatType: (data) ->
-    str = data.type.replace('fn', data.exprName).replace(/->/g, ':').replace('<top>', 'window')
+    return unless data.type
+    data.type = data.type.replace(/->/g, ':').replace('<top>', 'window')
+    data.type = data.type.replace(/^fn/, data.exprName)
+
+  prepareType: (data) ->
+    return unless data.type
+    type = data.type.replace(/->/g, ':').replace('<top>', 'window')
 
   formatTypeCompletion: (obj) ->
     if obj.isKeyword
@@ -93,7 +115,7 @@ class Helper
     if obj.type is 'string'
       obj.name = obj.name?.replace /(^"|"$)/g, ''
 
-    obj.type = obj.type?.replace(/->/g, ':').replace('<top>', 'window')
+    obj.type = obj.rightLabel = @prepareType(obj)
 
     if obj.type.replace(/fn\(.+\)/, '').length is 0
       obj.leftLabel = ''
@@ -103,31 +125,58 @@ class Helper
       else
         obj.leftLabel = obj.type.replace(/fn\(.{0,}\)/, '').replace(' : ', '')
 
-    obj.rightLabel = obj.rightLabelDoc = obj.type.replace(/( : .+)/, '')
-
     if obj.rightLabel.startsWith('fn')
-      obj._snippet = @extractParams(obj.rightLabel.replace(/^fn\(/, '').replace(/\)$/, ''), obj.name)
+      params = @extractParams(obj.rightLabel)
+      if @manager.useSnippets || @manager.useSnippetsAndFunction
+        obj._snippet = @buildSnippet(params, obj.name)
+        obj._hasParams = if params.length then true else false
+      else
+        if @manager.doNotAddParantheses
+          obj._snippet = "#{obj.name}"
+        else
+          obj._snippet = if params.length then "#{obj.name}(${#{0}:#{}})" else "#{obj.name}()"
       obj._typeSelf = 'function'
 
     if obj.name
-      obj.rightLabelDoc = obj.rightLabel.replace(/^fn/, obj.name)
       if obj.leftLabel is obj.name
         obj.leftLabel = null
         obj.rightLabel = null
 
     if obj.leftLabel is obj.rightLabel
-      obj.rightLabelDoc = null
       obj.rightLabel = null
 
     obj
 
-  extractParams: (type, name) ->
-    params = type.match(@manager.regExp.params)
+  buildSnippet: (params, name) ->
+    return "#{name}()" if params.length is 0
     suggestionParams = []
-    return unless params
     for param, i in params
       suggestionParams.push "${#{i + 1}:#{param}}"
     "#{name}(#{suggestionParams.join(',')})"
+
+  extractParams: (type) ->
+    return [] unless type
+    start = type.indexOf('(') + 1
+    params = []
+    inside = 0
+    for i in [start..type.length - 1]
+      if type[i] is ':' and inside is -1
+        params.push type.substring(start, i - 2)
+        break
+      if i is type.length - 1
+        param = type.substring(start, i)
+        params.push param if param.length
+        break
+      if type[i] is ',' and inside is 0
+        params.push type.substring(start, i)
+        start = i + 1
+        continue
+      if type[i].match(/[{\[\(]/)
+        inside++
+        continue
+      if type[i].match(/[}\]\)]/)
+        inside--
+    params
 
   markDefinitionBufferRange: (cursor, editor) ->
     range = cursor.getCurrentWordBufferRange()

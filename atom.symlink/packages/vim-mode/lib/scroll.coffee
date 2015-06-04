@@ -1,11 +1,12 @@
 class Scroll
   isComplete: -> true
   isRecordable: -> false
-  constructor: (@editor) ->
+  constructor: (@editorElement) ->
     @scrolloff = 2 # atom default
+    @editor = @editorElement.getModel()
     @rows =
-      first: @editor.getFirstVisibleScreenRow()
-      last: @editor.getLastVisibleScreenRow()
+      first: @editorElement.getFirstVisibleScreenRow()
+      last: @editorElement.getLastVisibleScreenRow()
       final: @editor.getLastScreenRow()
 
 class ScrollDown extends Scroll
@@ -39,10 +40,10 @@ class ScrollUp extends Scroll
     @editor.scrollToScreenPosition([firstScreenRow - count, 0])
 
 class ScrollCursor extends Scroll
-  constructor: (@editor, @opts={}) ->
+  constructor: (@editorElement, @opts={}) ->
     super
     cursor = @editor.getCursorScreenPosition()
-    @pixel = @editor.pixelPositionForScreenPosition(cursor).top
+    @pixel = @editorElement.pixelPositionForScreenPosition(cursor).top
 
 class ScrollCursorToTop extends ScrollCursor
   execute: ->

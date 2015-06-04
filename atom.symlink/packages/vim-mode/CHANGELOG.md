@@ -1,5 +1,34 @@
 ## HEAD
 
+## 0.50
+
+* Fix cursor position after `dd` command - @bronson
+* Implement `ap` text-object differently than `ip` - MarkusSN
+
+## 0.49
+
+* Fix an issue that caused the cursor to move left incorrectly when near
+  the end of a line.
+
+## 0.48
+
+* Fix usages of deprecated APIs
+
+## 0.47
+
+* Fix usages of deprecated APIs - @hitsmaxft, @jacekkopecky
+
+## 0.46
+
+* Fix issues with deleting when there are multiple selections - @jacekkopecky
+* Add paragraph text-objects 'ip' and 'ap' - @t9md
+* Fix use of a deprecated method - @akonwi
+
+## 0.45
+
+* Added `ctrl-x` and `ctrl-a` for incrementing and decrementing numbers - @jacekkopecky
+* Fixed the behavior of scrolling motions in visual mode - @daniloisr
+
 ## 0.44
 
 * Fixed issue where canceling the replace operator would delete text - @jacekkopecky

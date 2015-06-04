@@ -1,33 +1,41 @@
 Helper = require './atom-ternjs-helper'
+Config = require './atom-ternjs-config'
+Server = null
+Client = null
 
 module.exports =
 class Manager
 
   disposables: []
   grammars: ['JavaScript']
+  clients: []
   client: null
+  servers: []
   server: null
   helper: null
   rename: null
+  config: null
+  useSnippets: false
+  useSnippetsAndFunction: false
+  doNotAddParantheses: false
   type: null
+  useLint: null
   reference: null
   provider: null
   initialised: false
   inlineFnCompletion: false
 
-  # regexp
-  regExp:
-    params: /(([\w:\.\$\?\[\]\| ]+)(\([\w:\.\$\?\[\]\|, ]*\))?({[\w:\.\$\?\[\]\|, ]*})?\|?([\w:\.\$\?\[\]\| ]*))/ig
-
   constructor: (provider) ->
     @provider = provider
-    @checkGrammarSettings()
     @helper = new Helper(this)
+    @config = new Config(this)
     @registerHelperCommands()
     @provider.init(this)
-    @startServer()
-    @disposables.push atom.workspace.onDidOpen (e) =>
-      @startServer()
+    @initServers()
+    @disposables.push atom.project.onDidChangePaths (paths) =>
+      @destroyServer(paths)
+      @checkPaths(paths)
+      @setActiveServerAndClient()
 
   init: ->
     @initialised = true
@@ -35,12 +43,20 @@ class Manager
     @registerCommands()
 
   destroy: ->
-    @stopServer()
-    @client?.unregisterEvents()
+    for server in @servers
+      server.stop()
+      server = null
+    @servers = []
+    for client in @clients
+      client.unregisterEvents()
+      client = null
+    @clients = []
+    @server = null
     @client = null
     @unregisterEventsAndCommands()
-    @provider?.destroy()
     @provider = null
+    @config?.destroy()
+    @config = null
     @reference?.destroy()
     @reference = null
     @rename?.destroy()
@@ -56,17 +72,76 @@ class Manager
       disposable.dispose()
     @disposables = []
 
-  startServer: ->
-    return unless !@server?.process and atom.project.getDirectories()[0]
-    Server = require './atom-ternjs-server'
-    @server = new Server()
-    @server.start (port) =>
-      if !@client
-        Client = require './atom-ternjs-client'
-        @client = new Client(this)
-      @client.port = port
-      return if @initialised
-      @init()
+  initServers: ->
+    dirs = atom.project.getDirectories()
+    return unless dirs.length
+    for i in [0..dirs.length - 1]
+      dir = atom.project.relativizePath(dirs[i].path)[0]
+      @startServer(dir)
+
+  startServer: (dir) ->
+    Server = require './atom-ternjs-server' if !Server
+    return if @getServerForProject(dir)
+    idxServer = @servers.push(new Server(dir)) - 1
+    @servers[idxServer].start (port) =>
+      client = @getClientForProject(dir)
+      if !client
+        Client = require './atom-ternjs-client' if !Client
+        clientIdx = @clients.push(new Client(this, dir)) - 1
+        @clients[clientIdx].port = port
+      else
+        client.port = port
+      @init() if @servers.length is @clients.length and !@initialised
+      @setActiveServerAndClient()
+
+  setActiveServerAndClient: (URI) ->
+    if !URI
+      activePane = atom.workspace.getActivePaneItem()
+      URI = if activePane then activePane.getURI?() else false
+    if !URI
+      @server = false
+      @client = false
+      return
+    dir = atom.project.relativizePath(URI)[0]
+    server = @getServerForProject(dir)
+    client = @getClientForProject(dir)
+    if server and client
+      @server = server
+      @config.gatherData()
+      @client = client
+    else
+      @server = false
+      @client = false
+
+  checkPaths: (paths) ->
+    for path in paths
+      dir = atom.project.relativizePath(path)[0]
+      @startServer(dir)
+
+  destroyServer: (paths) ->
+    return unless @servers.length
+    serverIdx = undefined
+    for i in [0..@servers.length - 1]
+      if paths.indexOf(@servers[i].rootPath) is -1
+        serverIdx = i
+    return if serverIdx is undefined
+    server = @servers[serverIdx]
+    client = @getClientForProject(server.rootPath)
+    client.unregisterEvents()
+    client = null
+    server.stop()
+    server = null
+    @servers.splice(serverIdx, 1)
+
+  getServerForProject: (rootPath) ->
+    for server in @servers
+      return server if server.rootPath is rootPath
+    return
+
+  getClientForProject: (rootPath) ->
+    for client in @clients
+      return client if client.rootPath is rootPath
+    return
 
   isValidEditor: (editor) ->
     return false if !editor or editor.mini
@@ -101,11 +176,28 @@ class Manager
       @rename?.hide()
       if !@isValidEditor(item)
         @reference?.hide()
+      else
+        @setActiveServerAndClient(item.getURI())
     @disposables.push atom.config.observe 'atom-ternjs.inlineFnCompletion', =>
       @inlineFnCompletion = atom.config.get('atom-ternjs.inlineFnCompletion')
       @type?.destroyOverlay()
     @disposables.push atom.config.observe 'atom-ternjs.coffeeScript', =>
       @checkGrammarSettings()
+    @disposables.push atom.config.observe 'atom-ternjs.lint', =>
+      @useLint = atom.config.get('atom-ternjs.lint')
+    @disposables.push atom.config.observe 'atom-ternjs.useSnippets', (value) =>
+      @useSnippets = value
+      return unless value
+      atom.config.set('atom-ternjs.doNotAddParantheses', false)
+    @disposables.push atom.config.observe 'atom-ternjs.useSnippetsAndFunction', (value) =>
+      @useSnippetsAndFunction = value
+      return unless value
+      atom.config.set('atom-ternjs.doNotAddParantheses', false)
+    @disposables.push atom.config.observe 'atom-ternjs.doNotAddParantheses', (value) =>
+      @doNotAddParantheses = atom.config.get('atom-ternjs.lint')
+      return unless value
+      atom.config.set('atom-ternjs.useSnippets', false)
+      atom.config.set('atom-ternjs.useSnippetsAndFunction', false)
 
   checkGrammarSettings: ->
     if atom.config.get('atom-ternjs.coffeeScript')
@@ -125,8 +217,13 @@ class Manager
     @grammars.splice(idx, 1)
 
   registerHelperCommands: ->
-    @disposables.push atom.commands.add 'atom-text-editor', 'tern:createTernProjectFile': (event) =>
+    @disposables.push atom.commands.add 'atom-workspace', 'tern:createTernProjectFile': (event) =>
       @helper.createTernProjectFile()
+    # @disposables.push atom.commands.add 'atom-text-editor', 'tern:openConfig': (event) =>
+    #   if !@config
+    #     Config = require './atom-ternjs-config'
+    #     @config = new Config(this)
+    #   @config.show()
 
   registerCommands: ->
     @disposables.push atom.commands.add 'atom-text-editor', 'tern:rename': (event) =>
@@ -140,14 +237,17 @@ class Manager
       @provider?.forceCompletion()
     @disposables.push atom.commands.add 'atom-text-editor', 'tern:definition': (event) =>
       @client?.definition()
-    @disposables.push atom.commands.add 'atom-text-editor', 'tern:restart': (event) =>
+    @disposables.push atom.commands.add 'atom-workspace', 'tern:restart': (event) =>
       @restartServer()
 
-  stopServer: ->
-    @server?.stop()
-    @server = null
-
   restartServer: ->
+    return unless @server
+    dir = @server.rootPath
+    for i in [0..@servers.length - 1]
+      if dir is @servers[i].rootPath
+        serverIdx = i
+        break
     @server?.stop()
     @server = null
-    @startServer()
+    @servers.splice(serverIdx, 1)
+    @startServer(dir)

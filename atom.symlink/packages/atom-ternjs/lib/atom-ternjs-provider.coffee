@@ -1,5 +1,5 @@
-apd = require 'atom-package-dependencies'
 {Function} = require 'loophole'
+_ = require 'underscore-plus'
 
 module.exports =
 class Provider
@@ -7,7 +7,6 @@ class Provider
   manager: null
   force: false
   # automcomplete-plus
-  autocompletePlus: null
   selector: '.source.js'
   disableForSelector: '.source.js .comment'
   inclusionPriority: 1
@@ -15,8 +14,6 @@ class Provider
 
   init: (manager) ->
     @manager = manager
-    atom.packages.activatePackage('autocomplete-plus').then (pkg) =>
-      @autocompletePlus = apd.require('autocomplete-plus')
 
   isValidPrefix: (prefix) ->
     return true if prefix[prefix.length - 1] is '\.'
@@ -36,17 +33,16 @@ class Provider
     line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
     line.match(regexp)?[0]
 
-  getSuggestions: ({editor, bufferPosition, scopeDescriptor, prefix}) ->
+  getSuggestions: ({editor, bufferPosition, scopeDescriptor, prefix, activatedManually}) ->
+    return [] unless @manager.client
     tempPrefix = @getPrefix(editor, bufferPosition) or prefix
-    if !@isValidPrefix(tempPrefix) and !@force
+    if !@isValidPrefix(tempPrefix) and !@force and !activatedManually
       return []
     prefix = @checkPrefix(tempPrefix)
 
-    that = this
-
-    return new Promise (resolve) ->
-      that.manager.client.update(editor.getURI(), editor.getText()).then =>
-        that.manager.client.completions(editor.getURI(), {line: bufferPosition.row, ch: bufferPosition.column}).then (data) =>
+    return new Promise (resolve) =>
+      @manager.client.update(editor.getURI(), editor.getText()).then =>
+        @manager.client.completions(editor.getURI(), {line: bufferPosition.row, ch: bufferPosition.column}).then (data) =>
           if !data.completions.length
             resolve([])
             return
@@ -54,12 +50,11 @@ class Provider
           suggestionsArr = []
 
           for obj, index in data.completions
-            obj = that.manager.helper.formatTypeCompletion(obj)
-
+            obj = @manager.helper.formatTypeCompletion(obj)
             description = if obj.doc then obj.doc else null
-            url = if obj.url then obj.doc else null
+            url = if obj.url then obj.url else null
 
-            suggestionsArr.push {
+            suggestion =
               text: obj.name
               replacementPrefix: prefix
               className: null
@@ -68,16 +63,23 @@ class Provider
               snippet: obj._snippet
               description: description
               descriptionMoreURL: url
-            }
+
+            if atom.config.get('atom-ternjs.useSnippetsAndFunction') and obj._hasParams
+              suggestionClone = _.clone(suggestion)
+              suggestionClone.type = 'snippet'
+              suggestion.snippet = if obj._hasParams then "#{obj.name}(${#{0}:#{}})" else "#{obj.name}()"
+              suggestionsArr.push suggestion
+              suggestionsArr.push suggestionClone
+            else
+              suggestionsArr.push suggestion
+
           resolve(suggestionsArr)
         , (err) ->
           console.log err
 
   forceCompletion: ->
     @force = true
-    # need this for now. no plan, to hook this forever
-    @autocompletePlus.autocompleteManager.shouldDisplaySuggestions = true
-    @autocompletePlus.autocompleteManager.findSuggestions()
+    atom.commands.dispatch(atom.views.getView(atom.workspace.getActiveTextEditor()), 'autocomplete-plus:activate');
     @force = false
 
   addSelector: (selector) ->

@@ -1,6 +1,7 @@
 RenameView = require './atom-ternjs-rename-view'
 {Point, Range} = require 'atom'
 _ = require 'underscore-plus'
+path = require 'path'
 
 module.exports =
 class Rename
@@ -27,19 +28,24 @@ class Rename
     @renamePanel.show()
 
   updateAllAndRename: (newName) ->
+    return unless @manager.client
     idx = 0
     editors = atom.workspace.getTextEditors()
+
     for editor in editors
       if !@manager.isValidEditor(editor)
         idx++
         continue
+      if atom.project.relativizePath(editor.getURI())[0] isnt @manager.client.rootPath
+        idx++
+        continue
       @manager.client.update(editor.getURI(), editor.getText()).then =>
         if ++idx is editors.length
-          editor = atom.workspace.getActiveEditor()
+          editor = atom.workspace.getActiveTextEditor()
           cursor = editor.getLastCursor()
           return unless cursor
           position = cursor.getBufferPosition()
-          @manager.client?.rename(editor.getURI(), {line: position.row, ch: position.column}, newName).then (data) =>
+          @manager.client.rename(editor.getURI(), {line: position.row, ch: position.column}, newName).then (data) =>
             return unless data
             @rename(data)
           , (err) ->
@@ -47,16 +53,14 @@ class Rename
             atom.notifications.addError(content, dismissable: false)
 
   rename: (obj) ->
-    dir = atom.project.getDirectories()[0]
+    dir = @manager.server.rootPath
     return unless dir
-
-    that = this
 
     translateColumnBy = obj.changes[0].text.length - obj.name.length
 
     for change in obj.changes
       change.file = change.file.replace(/^.\//, '')
-      change.file = dir.relativize(change.file)
+      change.file = path.resolve(atom.project.relativizePath(dir)[0], change.file)
     changes = _.uniq(obj.changes, (item) =>
       JSON.stringify item
     )
@@ -74,12 +78,11 @@ class Rename
       @openFilesAndRename(arrObj, translateColumnBy)
 
   openFilesAndRename: (obj, translateColumnBy) ->
-    that = this
-    atom.workspace.open(obj[0].file).then (textEditor) ->
+    atom.workspace.open(obj[0].file).then (textEditor) =>
       currentColumnOffset = 0
       buffer = textEditor.getBuffer()
       for change, i in obj
-        that.setTextInRange(buffer, change, currentColumnOffset, (i is obj.length - 1), textEditor)
+        @setTextInRange(buffer, change, currentColumnOffset, (i is obj.length - 1), textEditor)
         currentColumnOffset += translateColumnBy
 
   setTextInRange: (buffer, change, offset, moveCursor, textEditor) ->

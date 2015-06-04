@@ -28,11 +28,12 @@ class VimState
     @marks = {}
     @subscriptions.add @editor.onDidDestroy => @destroy()
 
-    @subscriptions.add @editor.onDidChangeSelectionRange =>
-      if _.all(@editor.getSelections(), (selection) -> selection.isEmpty())
+    @subscriptions.add @editor.onDidChangeSelectionRange _.debounce(=>
+      if @editor.getSelections().every((selection) -> selection.isEmpty())
         @activateCommandMode() if @mode is 'visual'
       else
         @activateVisualMode('characterwise') if @mode is 'command'
+    , 100)
 
     @editorElement.classList.add("vim-mode")
     @setupCommandMode()
@@ -111,26 +112,27 @@ class VimState
       'move-to-first-character-of-line': => new Motions.MoveToFirstCharacterOfLine(@editor, @)
       'move-to-first-character-of-line-and-down': => new Motions.MoveToFirstCharacterOfLineAndDown(@editor, @)
       'move-to-last-character-of-line': => new Motions.MoveToLastCharacterOfLine(@editor, @)
+      'move-to-last-nonblank-character-of-line-and-down': => new Motions.MoveToLastNonblankCharacterOfLineAndDown(@editor, @)
       'move-to-beginning-of-line': (e) => @moveOrRepeat(e)
       'move-to-first-character-of-line-up': => new Motions.MoveToFirstCharacterOfLineUp(@editor, @)
       'move-to-first-character-of-line-down': => new Motions.MoveToFirstCharacterOfLineDown(@editor, @)
       'move-to-start-of-file': => new Motions.MoveToStartOfFile(@editor, @)
       'move-to-line': => new Motions.MoveToAbsoluteLine(@editor, @)
-      'move-to-top-of-screen': => new Motions.MoveToTopOfScreen(@editor, @)
-      'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(@editor, @)
-      'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(@editor, @)
-      'scroll-down': => new Scroll.ScrollDown(@editor)
-      'scroll-up': => new Scroll.ScrollUp(@editor)
-      'scroll-cursor-to-top': => new Scroll.ScrollCursorToTop(@editor)
-      'scroll-cursor-to-top-leave': => new Scroll.ScrollCursorToTop(@editor, {leaveCursor: true})
-      'scroll-cursor-to-middle': => new Scroll.ScrollCursorToMiddle(@editor)
-      'scroll-cursor-to-middle-leave': => new Scroll.ScrollCursorToMiddle(@editor, {leaveCursor: true})
-      'scroll-cursor-to-bottom': => new Scroll.ScrollCursorToBottom(@editor)
-      'scroll-cursor-to-bottom-leave': => new Scroll.ScrollCursorToBottom(@editor, {leaveCursor: true})
-      'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(@editor, @)
-      'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(@editor, @)
-      'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(@editor, @)
-      'scroll-full-screen-down': => new Motions.ScrollFullDownKeepCursor(@editor, @)
+      'move-to-top-of-screen': => new Motions.MoveToTopOfScreen(@editorElement, @)
+      'move-to-bottom-of-screen': => new Motions.MoveToBottomOfScreen(@editorElement, @)
+      'move-to-middle-of-screen': => new Motions.MoveToMiddleOfScreen(@editorElement, @)
+      'scroll-down': => new Scroll.ScrollDown(@editorElement)
+      'scroll-up': => new Scroll.ScrollUp(@editorElement)
+      'scroll-cursor-to-top': => new Scroll.ScrollCursorToTop(@editorElement)
+      'scroll-cursor-to-top-leave': => new Scroll.ScrollCursorToTop(@editorElement, {leaveCursor: true})
+      'scroll-cursor-to-middle': => new Scroll.ScrollCursorToMiddle(@editorElement)
+      'scroll-cursor-to-middle-leave': => new Scroll.ScrollCursorToMiddle(@editorElement, {leaveCursor: true})
+      'scroll-cursor-to-bottom': => new Scroll.ScrollCursorToBottom(@editorElement)
+      'scroll-cursor-to-bottom-leave': => new Scroll.ScrollCursorToBottom(@editorElement, {leaveCursor: true})
+      'scroll-half-screen-up': => new Motions.ScrollHalfUpKeepCursor(@editorElement, @)
+      'scroll-full-screen-up': => new Motions.ScrollFullUpKeepCursor(@editorElement, @)
+      'scroll-half-screen-down': => new Motions.ScrollHalfDownKeepCursor(@editorElement, @)
+      'scroll-full-screen-down': => new Motions.ScrollFullDownKeepCursor(@editorElement, @)
       'select-inside-word': => new TextObjects.SelectInsideWord(@editor)
       'select-inside-double-quotes': => new TextObjects.SelectInsideQuotes(@editor, '"', false)
       'select-inside-single-quotes': => new TextObjects.SelectInsideQuotes(@editor, '\'', false)
@@ -140,6 +142,7 @@ class VimState
       'select-inside-tags': => new TextObjects.SelectInsideBrackets(@editor, '>', '<', false)
       'select-inside-square-brackets': => new TextObjects.SelectInsideBrackets(@editor, '[', ']', false)
       'select-inside-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', false)
+      'select-inside-paragraph': => new TextObjects.SelectInsideParagraph(@editor, false)
       'select-a-word': => new TextObjects.SelectAWord(@editor)
       'select-around-double-quotes': => new TextObjects.SelectInsideQuotes(@editor, '"', true)
       'select-around-single-quotes': => new TextObjects.SelectInsideQuotes(@editor, '\'', true)
@@ -148,6 +151,7 @@ class VimState
       'select-around-angle-brackets': => new TextObjects.SelectInsideBrackets(@editor, '<', '>', true)
       'select-around-square-brackets': => new TextObjects.SelectInsideBrackets(@editor, '[', ']', true)
       'select-around-parentheses': => new TextObjects.SelectInsideBrackets(@editor, '(', ')', true)
+      'select-around-paragraph': => new TextObjects.SelectAParagraph(@editor, true)
       'register-prefix': (e) => @registerPrefix(e)
       'repeat': (e) => new Operators.Repeat(@editor, @)
       'repeat-search': (e) => new Motions.RepeatSearch(@editor, @)
@@ -274,7 +278,7 @@ class VimState
       type = Utils.copyType(text)
       {text, type}
     else if name is '%'
-      text = @editor.getUri()
+      text = @editor.getURI()
       type = Utils.copyType(text)
       {text, type}
     else if name is "_" # Blackhole always returns nothing
@@ -375,6 +379,9 @@ class VimState
 
     @clearOpStack()
     selection.clear(autoscroll: false) for selection in @editor.getSelections()
+    for cursor in @editor.getCursors()
+      if cursor.isAtEndOfLine() and not cursor.isAtBeginningOfLine()
+        cursor.moveLeft()
 
     @updateStatusBar()
 
@@ -396,11 +403,11 @@ class VimState
     return unless @mode in [null, 'insert']
     @editorElement.component.setInputEnabled(false)
     @editor.groupChangesSinceCheckpoint(@insertionCheckpoint)
-    @insertionCheckpoint = null
-    transaction = _.last(@editor.buffer.history.undoStack)
+    changes = getChangesSinceCheckpoint(@editor.buffer, @insertionCheckpoint)
     item = @inputOperator(@history[0])
-    if item? and transaction?
-      item.confirmTransaction(transaction)
+    @insertionCheckpoint = null
+    if item?
+      item.confirmChanges(changes)
     for cursor in @editor.getCursors()
       cursor.moveLeft() unless cursor.isAtBeginningOfLine()
 
@@ -470,7 +477,7 @@ class VimState
   # Returns nothing.
   registerPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-    name = atom.keymap.keystrokeForKeyboardEvent(keyboardEvent)
+    name = atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent)
     if name.lastIndexOf('shift-', 0) is 0
       name = name.slice(6)
     new Prefixes.Register(name)
@@ -482,7 +489,7 @@ class VimState
   # Returns nothing.
   repeatPrefix: (e) ->
     keyboardEvent = e.originalEvent?.originalEvent ? e.originalEvent
-    num = parseInt(atom.keymap.keystrokeForKeyboardEvent(keyboardEvent))
+    num = parseInt(atom.keymaps.keystrokeForKeyboardEvent(keyboardEvent))
     if @topOperation() instanceof Prefixes.Repeat
       @topOperation().addDigit(num)
     else
@@ -537,3 +544,14 @@ class VimState
 
   updateStatusBar: ->
     @statusBarManager.update(@mode, @submode)
+
+# This uses private APIs and may break if TextBuffer is refactored.
+# Package authors - copy and paste this code at your own risk.
+getChangesSinceCheckpoint = (buffer, checkpoint) ->
+  {history} = buffer
+
+  # TODO: remove this conditional once Atom 0.200 has been out for a while.
+  if index = history.getCheckpointIndex?(checkpoint)
+    history.undoStack.slice(index)
+  else
+    []

@@ -5,13 +5,16 @@ Uses suggestion provider by [autocomplete-plus](https://github.com/atom-communit
 
 # Installation
 
-Install the package [autocomplete-plus](https://github.com/atom-community/autocomplete-plus).
+Make sure <a href="https://nodejs.org">Node.js</a> is installed and the PATH variable is set.
+Make sure <a href="http://git-scm.com">GIT</a> is installed and the PATH variable is set.
 
 In your project root create a file named .tern-project
 
 * With default config via menu (Packages -> Atom Ternjs -> Create default .tern-project) or by adding it manually. See docs @ http://ternjs.net/doc/manual.html#configuration.
 * Check path in loadEagerly
 * Restart the server via Packages -> Atom Ternjs -> Restart server
+
+If a root file named .tern-project is not found ~/.tern-config serves as a default.
 
 Example .tern-project file (customize to your own needs):
 ```
@@ -31,6 +34,7 @@ Example .tern-project file (customize to your own needs):
   "plugins": {
     "complete_strings": {},
     "node": {},
+    "lint": {},
     "angular": {},
     "requirejs": {},
     "doc_comment": {
@@ -53,18 +57,13 @@ Example .tern-project file (customize to your own needs):
 * complete_strings: When enabled, this plugin will gather (short) strings in your code, and completing when inside a string will try to complete to previously seen strings. Takes a single option, maxLength, which controls the maximum length of string values to gather, and defaults to 15. (optional)
 * doc_comment: tern will look for JSDoc-style type declarations. Returns the full comment text instead of the first sentence. (optional)
 * node: NodeJS (optional)
+* lint: <a href="https://github.com/angelozerr/tern-lint">angelozerr/tern-lint</a> is a tern plugin which is able to validate JavaScript files to collect semantic errors. <a href="https://github.com/AtomLinter/Linter">Linter</a> is used to display these errors and warnings (optional)
 * angular: AngularJS (optional)
 * requirejs: RequireJS (optional, understand RequireJS-style dependency management)
 * For a list of possible plugins goto http://ternjs.net/doc/manual.html#plugins
 
 # .tern-project created/modified
 * After the file was created or has been modified, restart the server via Packages -> Atom Ternjs -> Restart server
-
-# Platform Windows
-* Make sure node is installed and the PATH variable is set
-
-# Notes
-* This package is a work in progress and may contain various bugs, misbehaviours and performance issues
 
 # Features
 * Completion (autocompletion triggers automatically or can be forced with ctrl+alt+space)

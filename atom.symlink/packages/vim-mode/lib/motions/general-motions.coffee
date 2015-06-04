@@ -151,8 +151,14 @@ class MoveRight extends Motion
 
   moveCursor: (cursor, count=1) ->
     _.times count, =>
+      wrapToNextLine = settings.wrapLeftRightMotion()
+
+      # when the motion is combined with an operator, we will only wrap to the next line
+      # if we are already at the end of the line (after the last character)
+      wrapToNextLine = false if @vimState.mode is 'operator-pending' and not cursor.isAtEndOfLine()
+
       cursor.moveRight() unless cursor.isAtEndOfLine()
-      cursor.moveRight() if settings.wrapLeftRightMotion() and cursor.isAtEndOfLine()
+      cursor.moveRight() if wrapToNextLine and cursor.isAtEndOfLine()
       @ensureCursorIsWithinLine(cursor)
 
 class MoveUp extends Motion
@@ -285,9 +291,9 @@ class MoveToRelativeLine extends MoveToLine
     cursor.setBufferPosition([row + (count - 1), 0])
 
 class MoveToScreenLine extends MoveToLine
-  constructor: (@editor, @vimState, @scrolloff) ->
+  constructor: (@editorElement, @vimState, @scrolloff) ->
     @scrolloff = 2 # atom default
-    super(@editor, @vimState)
+    super(@editorElement.getModel(), @vimState)
 
   moveCursor: (cursor, count=1) ->
     {row, column} = cursor.getBufferPosition()
@@ -327,6 +333,25 @@ class MoveToLastCharacterOfLine extends Motion
       cursor.goalColumn = Infinity
       @ensureCursorIsWithinLine(cursor)
 
+class MoveToLastNonblankCharacterOfLineAndDown extends Motion
+  operatesInclusively: true
+
+  # moves cursor to the last non-whitespace character on the line
+  # similar to skipLeadingWhitespace() in atom's cursor.coffee
+  skipTrailingWhitespace: (cursor) ->
+    position = cursor.getBufferPosition()
+    scanRange = cursor.getCurrentLineBufferRange()
+    startOfTrailingWhitespace = [scanRange.end.row, scanRange.end.column - 1]
+    @editor.scanInBufferRange /[ \t]+$/, scanRange, ({range}) ->
+      startOfTrailingWhitespace = range.start
+      startOfTrailingWhitespace.column -= 1
+    cursor.setBufferPosition(startOfTrailingWhitespace)
+
+  moveCursor: (cursor, count=1) ->
+    _.times count-1, ->
+      cursor.moveDown()
+    @skipTrailingWhitespace(cursor)
+
 class MoveToFirstCharacterOfLineUp extends Motion
   operatesLinewise: true
   operatesInclusively: true
@@ -355,7 +380,7 @@ class MoveToStartOfFile extends MoveToLine
 
 class MoveToTopOfScreen extends MoveToScreenLine
   getDestinationRow: (count=0) ->
-    firstScreenRow = @editor.getFirstVisibleScreenRow()
+    firstScreenRow = @editorElement.getFirstVisibleScreenRow()
     if firstScreenRow > 0
       offset = Math.max(count - 1, @scrolloff)
     else
@@ -364,7 +389,7 @@ class MoveToTopOfScreen extends MoveToScreenLine
 
 class MoveToBottomOfScreen extends MoveToScreenLine
   getDestinationRow: (count=0) ->
-    lastScreenRow = @editor.getLastVisibleScreenRow()
+    lastScreenRow = @editorElement.getLastVisibleScreenRow()
     lastRow = @editor.getBuffer().getLastRow()
     if lastScreenRow isnt lastRow
       offset = Math.max(count - 1, @scrolloff)
@@ -374,14 +399,17 @@ class MoveToBottomOfScreen extends MoveToScreenLine
 
 class MoveToMiddleOfScreen extends MoveToScreenLine
   getDestinationRow: (count) ->
-    firstScreenRow = @editor.getFirstVisibleScreenRow()
-    lastScreenRow = @editor.getLastVisibleScreenRow()
+    firstScreenRow = @editorElement.getFirstVisibleScreenRow()
+    lastScreenRow = @editorElement.getLastVisibleScreenRow()
     height = lastScreenRow - firstScreenRow
     Math.floor(firstScreenRow + (height / 2))
 
 class ScrollKeepingCursor extends MoveToLine
   previousFirstScreenRow: 0
   currentFirstScreenRow: 0
+
+  constructor: (@editorElement, @vimState) ->
+    super(@editorElement.getModel(), @vimState)
 
   select: (count, options) ->
     finalDestination = @scrollScreen(count)
@@ -401,10 +429,10 @@ class ScrollKeepingCursor extends MoveToLine
     @currentFirstScreenRow - @previousFirstScreenRow + row
 
   scrollScreen: (count = 1) ->
-    @previousFirstScreenRow = @editor.getFirstVisibleScreenRow()
+    @previousFirstScreenRow = @editorElement.getFirstVisibleScreenRow()
     destination = @scrollDestination(count)
     @editor.setScrollTop(destination)
-    @currentFirstScreenRow = @editor.getFirstVisibleScreenRow()
+    @currentFirstScreenRow = @editorElement.getFirstVisibleScreenRow()
     destination
 
 class ScrollHalfUpKeepCursor extends ScrollKeepingCursor
@@ -430,7 +458,8 @@ module.exports = {
   MoveToPreviousWord, MoveToPreviousWholeWord, MoveToNextWord, MoveToNextWholeWord,
   MoveToEndOfWord, MoveToNextParagraph, MoveToPreviousParagraph, MoveToAbsoluteLine, MoveToRelativeLine, MoveToBeginningOfLine,
   MoveToFirstCharacterOfLineUp, MoveToFirstCharacterOfLineDown,
-  MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineAndDown, MoveToLastCharacterOfLine, MoveToStartOfFile,
+  MoveToFirstCharacterOfLine, MoveToFirstCharacterOfLineAndDown, MoveToLastCharacterOfLine,
+  MoveToLastNonblankCharacterOfLineAndDown, MoveToStartOfFile,
   MoveToTopOfScreen, MoveToBottomOfScreen, MoveToMiddleOfScreen, MoveToEndOfWholeWord, MotionError,
   ScrollHalfUpKeepCursor, ScrollFullUpKeepCursor,
   ScrollHalfDownKeepCursor, ScrollFullDownKeepCursor
