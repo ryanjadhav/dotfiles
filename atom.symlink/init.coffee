@@ -12,9 +12,3 @@
 #   editor = editorView.getEditor()
 #   if path.extname(editor.getPath()) is '.md'
 #     editor.setSoftWrap(true)
-
-path = require 'path'
-
-atom.workspace.observeTextEditors (editor) ->
-  if path.extname(editor.getPath()) is '.md'
-    editor.setSoftWrap(true)
