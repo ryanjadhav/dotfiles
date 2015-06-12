@@ -11,8 +11,7 @@
     fontFamily: "Menlo"
     showIndentGuide: true
     tabLength: 2
-    invisibles:
-      {}
+    invisibles: {}
     preferredLineLength: 100
     showInvisibles: true
     fontSize: 14
@@ -43,14 +42,12 @@
   "tree-view":
     hideIgnoredNames: false
     hideVcsIgnoredFiles: false
-  "autoclose-html":
-    {}
+  "autoclose-html": {}
   linter:
     lintDebug: true
     statusBar: "Show error of the selected line"
     showErrorInline: false
-  "linter-jshint":
-    {}
+  "linter-jshint": {}
   "autocomplete-plus":
     confirmCompletion: "tab and enter"
   "vim-mode":
@@ -59,17 +56,11 @@
   "linter-eslint":
     disableWhenNoEslintrcFileInPath: true
     useGlobalEslint: true
-  minimap:
-    {}
-  "atom-pair":
-    {}
-  ternjs:
-    {}
-  "code-links":
-    {}
+  minimap: {}
+  "atom-pair": {}
+  ternjs: {}
+  "code-links": {}
   "atom-beautify":
     _analyticsUserId: "9248b31f-f709-40a3-bf2f-584776d6b5e4"
-  "one-dark-ui":
-    {}
-  "atom-ternjs":
-    {}
+  "one-dark-ui": {}
+  "atom-ternjs": {}
