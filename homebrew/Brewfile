@@ -1,0 +1,30 @@
+# brew tap
+tap 'homebrew/cask'
+# set arguments for all 'brew cask install' commands
+cask_args appdir: '~/Applications'
+
+# brew install
+brew 'mas'
+brew 'nvm'
+brew 'go'
+brew 'python'
+
+# brew cask install
+cask 'google-chrome'
+cask 'firefox'
+cask 'slack'
+cask 'figma'
+cask 'aerial'
+cask 'goland'
+cask 'postman'
+cask 'skitch'
+cask 'textmate'
+cask 'github'
+cask 'notion'
+cask 'vagrant'
+cask 'visual-studio-code'
+
+# brew mas install
+mas 'Xcode', id: 497799835
+mas 'iAWriter', id: 775737590
+mas 'Lungo', id: 1263070803

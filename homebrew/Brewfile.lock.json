@@ -1,0 +1,159 @@
+{
+  "entries": {
+    "tap": {
+      "homebrew/cask": {
+        "revision": "81765be7e254fed621e45711746b6e83c0c522f0"
+      }
+    },
+    "brew": {
+      "mas": {
+        "version": "1.7.0",
+        "bottle": {
+          "cellar": ":any",
+          "prefix": "/usr/local",
+          "files": {
+            "catalina": {
+              "url": "https://homebrew.bintray.com/bottles/mas-1.7.0.catalina.bottle.tar.gz",
+              "sha256": "b985d100947063ee94961f7f1290f232786634b869d20d56bd553197cf91188b"
+            },
+            "mojave": {
+              "url": "https://homebrew.bintray.com/bottles/mas-1.7.0.mojave.bottle.tar.gz",
+              "sha256": "c7005c34a3cf38d23f98e9cc238a0deae61f50ea5dfbcf51a34cc689a9db315e"
+            }
+          }
+        }
+      }
+    },
+    "cask": {
+      "google-chrome": {
+        "version": "latest",
+        "options": {
+          "full_name": "google-chrome",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "firefox": {
+        "version": "78.0.2",
+        "options": {
+          "full_name": "firefox",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "slack": {
+        "version": "4.7.0",
+        "options": {
+          "full_name": "slack",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "figma": {
+        "version": "latest",
+        "options": {
+          "full_name": "figma",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "aerial": {
+        "version": "1.9.2",
+        "options": {
+          "full_name": "aerial",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "goland": {
+        "version": "2018.1.4,181.5087.39",
+        "options": {
+          "full_name": "goland",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "postman": {
+        "version": "7.27.1",
+        "options": {
+          "full_name": "postman",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "skitch": {
+        "version": "2.8.1",
+        "options": {
+          "full_name": "skitch",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "textmate": {
+        "version": "2.0-rc.9",
+        "options": {
+          "full_name": "textmate",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "github": {
+        "version": "2.5.3-f26bc4fa",
+        "options": {
+          "full_name": "github",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "notion": {
+        "version": "2.0.7",
+        "options": {
+          "full_name": "notion",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "vagrant": {
+        "version": "2.2.9",
+        "options": {
+          "full_name": "vagrant",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      },
+      "visual-studio-code": {
+        "version": "1.47.2",
+        "options": {
+          "full_name": "visual-studio-code",
+          "args": {
+            "appdir": "~/Applications"
+          }
+        }
+      }
+    }
+  },
+  "system": {
+    "macos": {
+      "catalina": {
+        "HOMEBREW_VERSION": "2.4.8",
+        "HOMEBREW_PREFIX": "/usr/local",
+        "Homebrew/homebrew-core": "61507ff917a27a1bf0bd35abc8ae8081e5c4dd48",
+        "CLT": "",
+        "Xcode": "11.5",
+        "macOS": "10.15.5"
+      }
+    }
+  }
+}
