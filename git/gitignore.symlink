@@ -22,6 +22,9 @@
 # atom config
 .tern-project
 
+# vsconfig
+.jsconfig.json
+
 # logs
 npm-debug.log
 newrelic_agent.log

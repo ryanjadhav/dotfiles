@@ -42,3 +42,37 @@ ulimit -n 2048
 ulimit -u 1024
 
 unset config_files
+if [ -f ~/.devbox/profile ]
+then
+  source ~/.devbox/profile
+fi
+
+source '/Users/rjadhav/Work/awsaccess/awsaccess2.sh' # awsaccess
+export PS1="\$(ps1_mfa_context)$PS1" # awsaccess
+
+# python virtualenv setup
+export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$HOME/Work
+export VIRTUALENVWRAPPER_PYTHON=`which python3`
+source $HOME/Library/Python/3.6/bin/virtualenvwrapper.sh
+function lyftpip() {
+  PIP_CONFIG_FILE="$HOME/.pip/lyft.conf" pip "$@"
+}
+
+# node version manager setup
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# point openssl to the brew install 
+export CPPFLAGS=-I/usr/local/opt/openssl/include
+export LDFLAGS=-L/usr/local/opt/openssl/lib
+
+# golang config
+export GOPATH=~/go
+export PATH=$GOPATH/bin:$PATH
+
+# add home /bin folder into PATH for lyftvenv
+export PATH="$HOME/bin:$PATH"
+export PATH="/usr/local/opt/node@10/bin:$PATH"
+PATH=$PATH:/Users/rjadhav/.lyftkube-bin

@@ -12,7 +12,4 @@ then
   ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
-# Install homebrew packages
-brew install grc coreutils spark direnv exiftool youtube-dl hub s3cmd taglib id3lib the_silver_searcher ffmpeg
-
 exit 0
