@@ -18,8 +18,8 @@ cask 'figma'
 cask 'github'
 cask 'goland'
 cask 'google-chrome'
+cask 'hyper'
 cask 'istat-menus'
-cask 'iterm2'
 cask 'notion'
 cask 'postman'
 cask 'skitch'
@@ -27,9 +27,9 @@ cask 'slack'
 cask 'spectacle'
 cask 'textmate'
 cask 'vagrant'
-cask 'visual-studio-code'
 
 # brew mas install
 mas 'Xcode', id: 497799835
 mas 'iAWriter', id: 775737590
 mas 'Lungo', id: 1263070803
+mas 'Slack', id: 803453959
