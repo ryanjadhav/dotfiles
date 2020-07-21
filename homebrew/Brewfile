@@ -6,7 +6,7 @@ cask_args appdir: '~/Applications'
 # brew install
 brew 'mas'
 brew 'python'
-brew 'precommit'
+brew 'pre-commit'
 brew 'nvm'
 brew 'go'
 
