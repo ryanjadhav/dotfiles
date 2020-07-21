@@ -1,10 +1,11 @@
 # brew tap
 tap 'homebrew/cask'
 # set arguments for all 'brew cask install' commands
-cask_args appdir: '~/Applications'
+cask_args appdir: '/Applications'
 
 # brew install
 brew 'mas'
+brew 'openssl'
 brew 'python'
 brew 'pre-commit'
 brew 'nvm'
@@ -19,6 +20,7 @@ cask 'github'
 cask 'goland'
 cask 'google-chrome'
 cask 'hyper'
+cask 'kap'
 cask 'istat-menus'
 cask 'notion'
 cask 'postman'
@@ -29,6 +31,7 @@ cask 'textmate'
 cask 'vagrant'
 
 # brew mas install
+mas '1Password', id: 1333542190
 mas 'Xcode', id: 497799835
 mas 'iAWriter', id: 775737590
 mas 'Lungo', id: 1263070803

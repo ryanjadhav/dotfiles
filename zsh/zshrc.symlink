@@ -47,22 +47,13 @@ then
   source ~/.devbox/profile
 fi
 
-source '/Users/rjadhav/Work/awsaccess/awsaccess2.sh' # awsaccess
-export PS1="\$(ps1_mfa_context)$PS1" # awsaccess
-
-# python virtualenv setup
-export WORKON_HOME=$HOME/.virtualenvs
-export PROJECT_HOME=$HOME/Work
-export VIRTUALENVWRAPPER_PYTHON=`which python3`
-source $HOME/Library/Python/3.6/bin/virtualenvwrapper.sh
-function lyftpip() {
-  PIP_CONFIG_FILE="$HOME/.pip/lyft.conf" pip "$@"
-}
+# i dont remember this
+# source '/Users/rjadhav/Work/awsaccess/awsaccess2.sh' # awsaccess
+# export PS1="\$(ps1_mfa_context)$PS1" # awsaccess
 
 # node version manager setup
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export NVM_DIR=~/.nvm
+source $(brew --prefix nvm)/nvm.sh
 
 # point openssl to the brew install 
 export CPPFLAGS=-I/usr/local/opt/openssl/include
